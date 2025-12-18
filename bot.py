@@ -531,20 +531,13 @@ Resources:
                 leaderboard = stats["data"]["get_leaderboard_v2"]["leaderboard"]
 
                 if leaderboard == []:
-                    total_score = 0
+                    xp_score = 0
                 else:
-                    gold_score = leaderboard[0]["gold_score"]
-                    gold_referral_score = leaderboard[0]["gold_referral_score"]
                     xp_score = leaderboard[0]["xp_score"]
-                    xp_referral_score = leaderboard[0]["xp_referral_score"]
-                    gems_score = leaderboard[0]["gems_score"]
-                    gems_referral_score = leaderboard[0]["gems_referral_score"]
-
-                    total_score = gold_score + gold_referral_score + xp_score + xp_referral_score + gems_score + gems_referral_score
 
                 self.log(
                     f"{Fore.CYAN+Style.BRIGHT}Points  :{Style.RESET_ALL}"
-                    f"{Fore.WHITE+Style.BRIGHT} {total_score} Bags {Style.RESET_ALL}"
+                    f"{Fore.WHITE+Style.BRIGHT} {xp_score} Bags {Style.RESET_ALL}"
                 )
 
             config = await self.checkin_config(address, proxy)
