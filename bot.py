@@ -18,12 +18,13 @@ wib = pytz.timezone('Asia/Jakarta')
 
 class Concrete:
     def __init__(self) -> None:
-        self.BASE_API = "https://points.concrete.xyz/api"
-        self.GRAPHQL = "https://gql3.absinthe.network/v1/graphql"
+        self.API_1 = "https://points.concrete.xyz/api"
+        self.API_2 = "https://api.absinthe.network"
+        self.API_3 = "https://gql3.absinthe.network/v1/graphql"
         self.SEASON_ID = "z2zi-tzc2"
         self.REF_CODE = "b956a28a" # U can change it with yours.
-        self.BASE_HEADERS = {}
-        self.GRAPHQL_HEADERS = {}
+        self.HEADERS_1 = {}
+        self.HEADER_2 = {}
         self.proxies = []
         self.proxy_index = 0
         self.account_proxies = {}
@@ -226,9 +227,9 @@ Resources:
         return None
     
     async def auth_csrf(self, address: str, proxy_url=None, retries=5):
-        url = f"{self.BASE_API}/auth/csrf"
+        url = f"{self.API_1}/auth/csrf"
         headers = {
-            **self.BASE_HEADERS[address],
+            **self.HEADERS_1[address],
             "Content-Type": "application/json",
             "Cookie": self.cookie_headers[address]
         }
@@ -263,10 +264,10 @@ Resources:
         return None
     
     async def auth_credentials(self, account: str, address: str, csrf_token: str, proxy_url=None, retries=5):
-        url = f"{self.BASE_API}/auth/callback/credentials"
+        url = f"{self.API_1}/auth/callback/credentials"
         payload = self.generate_payload(account, address, csrf_token)
         headers = {
-            **self.BASE_HEADERS[address],
+            **self.HEADERS_1[address],
             "Content-Type": "application/x-www-form-urlencoded",
             "Cookie": self.cookie_headers[address]
         }
@@ -299,9 +300,9 @@ Resources:
         return None
     
     async def auth_session(self, address: str, proxy_url=None, retries=5):
-        url = f"{self.BASE_API}/auth/session"
+        url = f"{self.API_1}/auth/session"
         headers = {
-            **self.BASE_HEADERS[address],
+            **self.HEADERS_1[address],
             "Content-Type": "application/json",
             "Cookie": self.cookie_headers[address]
         }
@@ -337,7 +338,7 @@ Resources:
             "query":"mutation updateReferralCode($applyReferralCodeInput: ApplyReferralCodeInput!) {\n  apply_referral_code(referral_code_data: $applyReferralCodeInput) {\n    success\n    __typename\n  }\n}"
         })
         headers = {
-            **self.GRAPHQL_HEADERS[address],
+            **self.HEADER_2[address],
             "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
@@ -346,7 +347,7 @@ Resources:
             connector, proxy, proxy_auth = self.build_proxy_config(proxy_url)
             try:
                 async with ClientSession(connector=connector, timeout=ClientTimeout(total=60)) as session:
-                    async with session.post(url=self.GRAPHQL, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
+                    async with session.post(url=self.API_3, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
                         response.raise_for_status()
                         return await response.json()
             except (Exception, ClientResponseError) as e:
@@ -362,30 +363,25 @@ Resources:
 
         return None
     
-    async def user_stats(self, address: str, proxy_url=None, retries=5):
-        data = json.dumps({
-            "operationName": "GetUserStats",
-            "variables": {
-                "leaderboardInput": {
-                    "client_season": self.SEASON_ID,
-                    "user_id": self.user_ids[address]
-                },
-                "clientSeason": self.SEASON_ID,
-                "wallet": address.lower()
-            },
-            "query": "query GetUserStats($leaderboardInput: LeaderboardV2Input!, $clientSeason: String!, $wallet: String!) {\n  get_leaderboard_v2(get_leaderboard_v2_data: $leaderboardInput) {\n    leaderboard {\n      identity\n      points_rank\n      gold_score\n      gold_referral_score\n      xp_score\n      xp_referral_score\n      gems_score\n      gems_referral_score\n      refreshed_at\n      __typename\n    }\n    currencies\n    __typename\n  }\n  mart_mart_claimable_tokens(\n    where: {client_season: {_eq: $clientSeason}, user_address: {_eq: $wallet}}\n  ) {\n    user_address\n    can_claim\n    merkle_proof\n    merkle_root\n    cumulative_amount_wei\n    cumulative_amount_tokens\n    remaining_claimable_wei\n    remaining_claimable_tokens\n    __typename\n  }\n  points_config_season_contracts(where: {client_season: {_eq: $clientSeason}}) {\n    distributor_address\n    chain_id\n    __typename\n  }\n}"
-        })
+    async def user_scores(self, address: str, proxy_url=None, retries=5):
+        url = f"{self.API_2}/users/{self.user_ids[address]}/scores"
         headers = {
-            **self.GRAPHQL_HEADERS[address],
-            "Authorization": f"Bearer {self.access_tokens[address]}",
-            "Content-Length": str(len(data)),
-            "Content-Type": "application/json"
+            **self.HEADER_2[address],
+            "Authorization": f"Bearer {self.access_tokens[address]}"
         }
         for attempt in range(retries):
             connector, proxy, proxy_auth = self.build_proxy_config(proxy_url)
             try:
                 async with ClientSession(connector=connector, timeout=ClientTimeout(total=60)) as session:
-                    async with session.post(url=self.GRAPHQL, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
+                    async with session.get(url=url, headers=headers, proxy=proxy, proxy_auth=proxy_auth) as response:
+                        if response.status == 404:
+                            resp_json = await response.json()
+                            err_msg = resp_json.get("error", "Unknown Error")
+                            self.log(
+                                f"{Fore.CYAN+Style.BRIGHT}Points  :{Style.RESET_ALL}"
+                                f"{Fore.YELLOW+Style.BRIGHT} {err_msg} {Style.RESET_ALL}"
+                            )
+                            return None
                         response.raise_for_status()
                         return await response.json()
             except (Exception, ClientResponseError) as e:
@@ -410,7 +406,7 @@ Resources:
             "query": "query getDailyCheckinConfig($clientSeason: String!) {\n  points_config_point_sources(\n    where: {client_season: {_eq: $clientSeason}, source_status: {_eq: LIVE}, source_type: {_eq: daily_checkin}}\n  ) {\n    id\n    threshold_config(order_by: {threshold: asc}) {\n      threshold\n      bonus_amount\n      __typename\n    }\n    __typename\n  }\n}"
         })
         headers = {
-            **self.GRAPHQL_HEADERS[address],
+            **self.HEADER_2[address],
             "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
@@ -419,7 +415,7 @@ Resources:
             connector, proxy, proxy_auth = self.build_proxy_config(proxy_url)
             try:
                 async with ClientSession(connector=connector, timeout=ClientTimeout(total=60)) as session:
-                    async with session.post(url=self.GRAPHQL, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
+                    async with session.post(url=self.API_3, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
                         response.raise_for_status()
                         return await response.json()
             except (Exception, ClientResponseError) as e:
@@ -449,7 +445,7 @@ Resources:
             "query": "mutation upsertDailyCheckin($object: DailyCheckinInput!) {\n  daily_checkin(point_source_data: $object) {\n    id\n    __typename\n  }\n}"
         })
         headers = {
-            **self.GRAPHQL_HEADERS[address],
+            **self.HEADER_2[address],
             "Authorization": f"Bearer {self.access_tokens[address]}",
             "Content-Length": str(len(data)),
             "Content-Type": "application/json"
@@ -458,7 +454,7 @@ Resources:
             connector, proxy, proxy_auth = self.build_proxy_config(proxy_url)
             try:
                 async with ClientSession(connector=connector, timeout=ClientTimeout(total=60)) as session:
-                    async with session.post(url=self.GRAPHQL, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
+                    async with session.post(url=self.API_3, headers=headers, data=data, proxy=proxy, proxy_auth=proxy_auth) as response:
                         response.raise_for_status()
                         return await response.json()
             except (Exception, ClientResponseError) as e:
@@ -526,14 +522,9 @@ Resources:
 
             await self.apply_ref(address, proxy)
 
-            stats = await self.user_stats(address, proxy)
-            if stats:
-                leaderboard = stats["data"]["get_leaderboard_v2"]["leaderboard"]
-
-                if leaderboard == []:
-                    xp_score = 0
-                else:
-                    xp_score = leaderboard[0]["xp_score"]
+            scores = await self.user_scores(address, proxy)
+            if scores:
+                xp_score = scores.get("scores", {}).get("xp", {}).get("total", 0)
 
                 self.log(
                     f"{Fore.CYAN+Style.BRIGHT}Points  :{Style.RESET_ALL}"
@@ -599,7 +590,7 @@ Resources:
 
                         user_agent = FakeUserAgent().random
 
-                        self.BASE_HEADERS[address] = {
+                        self.HEADERS_1[address] = {
                             "Accept": "*/*",
                             "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
                             "Origin": "https://points.concrete.xyz",
@@ -610,7 +601,7 @@ Resources:
                             "User-Agent": user_agent
                         }
 
-                        self.GRAPHQL_HEADERS[address] = {
+                        self.HEADER_2[address] = {
                             "Accept": "application/json",
                             "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
                             "Origin": "https://points.concrete.xyz",
