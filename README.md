@@ -4,7 +4,6 @@
 
 [![Python Version](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/vonssy/Concrete-BOT.svg)](https://github.com/vonssy/Concrete-BOT/stargazers)
 
 ## 📋 Table of Contents
 
@@ -45,8 +44,7 @@ Concrete BOT is an automated tool designed to claim daily check-in across multip
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/vonssy/Concrete-BOT.git
-cd Concrete-BOT
+git clone https://github.com/airdropbomb/Concrete.git && cd Concrete
 ```
 
 ### 2. Install Dependencies
@@ -114,53 +112,3 @@ python bot.py
 python3 bot.py
 ```
 
-### Runtime Options
-
-When starting the bot, you'll be prompted to choose:
-
-1. **Proxy Mode Selection:**
-   - Option `1`: Run with proxy
-   - Option `2`: Run without proxy
-
-2. **Auto-Rotation:** 
-   - `y`: Enable automatic invalid proxy rotation
-   - `n`: Disable auto-rotation
-
-## 💖 Support the Project
-
-If this project has been helpful to you, consider supporting its development:
-
-### Cryptocurrency Donations
-
-| Network | Address |
-|---------|---------|
-| **EVM** | `0xe3c9ef9a39e9eb0582e5b147026cae524338521a` |
-| **TON** | `UQBEFv58DC4FUrGqinBB5PAQS7TzXSm5c1Fn6nkiet8kmehB` |
-| **SOL** | `E1xkaJYmAFEj28NPHKhjbf7GcvfdjKdvXju8d8AeSunf` |
-| **SUI** | `0xa03726ecbbe00b31df6a61d7a59d02a7eedc39fe269532ceab97852a04cf3347` |
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-1. ⭐ **Star this repository** if you find it useful
-2. 👥 **Follow** for updates on new features
-3. 🐛 **Report issues** via GitHub Issues
-4. 💡 **Suggest improvements** or new features
-5. 🔧 **Submit pull requests** for bug fixes or enhancements
-
-## 📞 Contact & Support
-
-- **Developer:** vonssy
-- **Issues:** [GitHub Issues](https://github.com/vonssy/Concrete-BOT/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/vonssy/Concrete-BOT/discussions)
-
----
-
-<div align="center">
-
-**Made with ❤️ by [vonssy](https://github.com/vonssy)**
-
-*Thank you for using Concrete BOT! Don't forget to ⭐ star this repository.*
-
-</div>
